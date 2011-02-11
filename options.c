@@ -19,6 +19,7 @@ enum mode {
 	MODE_SUBDIR,
 	MODE_HEADER_TARGET,
 	MODE_HEADERS,
+	MODE_PASSTHROUGH,
 	MODE_END
 };
 
@@ -115,6 +116,13 @@ static void add_header(struct module *m, char *name)
 	m->header[m->headers - 1].name = strdup(name);
 }
 
+static void add_passthrough(struct module *m, char *name)
+{
+	m->passthroughs++;
+	m->passthrough = realloc(m->passthrough, m->passthroughs * sizeof(struct passthrough));
+	m->passthrough[m->passthroughs - 1].name = strdup(name);
+}
+
 static void add_library(struct module *m, char *name, enum library_type ltype)
 {
 	m->libraries++;
@@ -206,6 +214,9 @@ static enum mode get_mode(char *arg)
 	if (strcmp("-:HEADER_TARGET", arg) == 0)
 		return MODE_HEADER_TARGET;
 
+	if (strcmp("-:PASSTHROUGH", arg) == 0)
+		return MODE_PASSTHROUGH;
+
 	if (strcmp("-:END", arg) == 0)
 		return MODE_END;
 
@@ -280,6 +291,9 @@ struct project *options_parse(int argc, char **args)
 				break;
 			case MODE_HEADERS:
 				add_header(m, arg);
+				break;
+			case MODE_PASSTHROUGH:
+				add_passthrough(m, arg);
 				break;
 			case MODE_END:
 				break;

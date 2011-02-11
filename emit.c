@@ -73,6 +73,12 @@ int emit_file(struct project *p)
 	for (i = 0; i < p->modules; i++) {
 		struct module *m = &p->module[i];
 		printf("include $(CLEAR_VARS)\n\n");
+
+		if (m->passthrough) {
+			for (j = 0; j < m->passthroughs; j++)
+				printf("%s\n", m->passthrough[j].name);
+			printf("\n");
+		}
 		printf("LOCAL_MODULE:=%s\n\n", m->name);
 //no tags == no build for the external dir...
 		if (m->tags) {

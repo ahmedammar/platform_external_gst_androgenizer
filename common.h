@@ -36,6 +36,10 @@ struct generator {
 
 };
 
+struct passthrough {
+	char *name;
+};
+
 struct source {
 	char *name;
 	struct generator *gen;
@@ -73,6 +77,8 @@ struct module {
 	char *ldflags;
 	struct library *library;
 	int libraries;
+	struct passthrough *passthrough;
+	int passthroughs;
 	int tags;
 };
 
