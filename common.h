@@ -15,8 +15,8 @@ enum library_type {
 };
 
 enum script_type {
-	SCRIPT_TOP,
 	SCRIPT_SUBDIRECTORY,
+	SCRIPT_TOP,
 };
 
 enum build_type {
