@@ -50,7 +50,7 @@ static char *add_slashes(char *in)
 static struct project *new_project(char *name, enum script_type stype, enum build_type btype)
 {
 	struct project *out = calloc(1, sizeof(struct project));
-	out->name = strdup(name);
+	out->name = name;
 	out->stype = stype;
 	out->btype = btype;
 	return out;
@@ -59,7 +59,7 @@ static struct project *new_project(char *name, enum script_type stype, enum buil
 static struct module *new_module(char *name, enum module_type mtype)
 {
 	struct module *out = calloc(1, sizeof(struct module));
-	out->name = strdup(name);
+	out->name = name;
 	out->mtype = mtype;
 	return out;
 }
@@ -89,7 +89,7 @@ static void add_cflag(struct module *m, char *flag)
 		return;
 	m->cflags++;
 	m->cflag = realloc(m->cflag, m->cflags * sizeof(struct flag));
-	m->cflag[m->cflags - 1].flag = strdup(flag);
+	m->cflag[m->cflags - 1].flag = flag;
 }
 
 static void add_cppflag(struct module *m, char *flag)
@@ -98,14 +98,14 @@ static void add_cppflag(struct module *m, char *flag)
 		return;
 	m->cppflags++;
 	m->cppflag = realloc(m->cppflag, m->cppflags * sizeof(struct flag));
-	m->cppflag[m->cppflags - 1].flag = strdup(flag);
+	m->cppflag[m->cppflags - 1].flag = flag;
 }
 
 static void add_source(struct module *m, char *name, struct generator *g)
 {
 	m->sources++;
 	m->source = realloc(m->source, m->sources * sizeof(struct source));
-	m->source[m->sources - 1].name = strdup(name);
+	m->source[m->sources - 1].name = name;
 	m->source[m->sources - 1].gen = g;
 }
 
@@ -113,21 +113,21 @@ static void add_header(struct module *m, char *name)
 {
 	m->headers++;
 	m->header = realloc(m->header, m->headers * sizeof(struct header));
-	m->header[m->headers - 1].name = strdup(name);
+	m->header[m->headers - 1].name = name;
 }
 
 static void add_passthrough(struct module *m, char *name)
 {
 	m->passthroughs++;
 	m->passthrough = realloc(m->passthrough, m->passthroughs * sizeof(struct passthrough));
-	m->passthrough[m->passthroughs - 1].name = strdup(name);
+	m->passthrough[m->passthroughs - 1].name = name;
 }
 
 static void add_library(struct module *m, char *name, enum library_type ltype)
 {
 	m->libraries++;
 	m->library = realloc(m->library, m->libraries * sizeof(struct library));
-	m->library[m->libraries - 1].name = strdup(name);
+	m->library[m->libraries - 1].name = name;
 	m->library[m->libraries - 1].ltype = ltype;
 }
 
@@ -165,7 +165,7 @@ static void add_subdir(struct project *p, char *name)
 {
 	p->subdirs++;
 	p->subdir = realloc(p->subdir, p->subdirs * sizeof(struct subdir));
-	p->subdir[p->subdirs - 1].name = strdup(name);
+	p->subdir[p->subdirs - 1].name = name;
 }
 
 
