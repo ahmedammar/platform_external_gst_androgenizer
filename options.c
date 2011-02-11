@@ -17,6 +17,8 @@ enum mode {
 	MODE_LDFLAGS,
 	MODE_TAGS,
 	MODE_SUBDIR,
+	MODE_HEADER_TARGET,
+	MODE_HEADERS,
 	MODE_END
 };
 
@@ -106,6 +108,13 @@ static void add_source(struct module *m, char *name, struct generator *g)
 	m->source[m->sources - 1].gen = g;
 }
 
+static void add_header(struct module *m, char *name)
+{
+	m->headers++;
+	m->header = realloc(m->header, m->headers * sizeof(struct header));
+	m->header[m->headers - 1].name = strdup(name);
+}
+
 static void add_library(struct module *m, char *name, enum library_type ltype)
 {
 	m->libraries++;
@@ -191,6 +200,12 @@ static enum mode get_mode(char *arg)
 	if (strcmp("-:SUBDIR", arg) == 0)
 		return MODE_SUBDIR;
 
+	if (strcmp("-:HEADERS", arg) == 0)
+		return MODE_HEADERS;
+
+	if (strcmp("-:HEADER_TARGET", arg) == 0)
+		return MODE_HEADER_TARGET;
+
 	if (strcmp("-:END", arg) == 0)
 		return MODE_END;
 
@@ -257,6 +272,14 @@ struct project *options_parse(int argc, char **args)
 				break;
 			case MODE_TAGS:
 				add_tag(m, arg);
+				break;
+			case MODE_HEADER_TARGET:
+				if (m->header_target)
+					free(m->header_target);
+				m->header_target = arg;
+				break;
+			case MODE_HEADERS:
+				add_header(m, arg);
 				break;
 			case MODE_END:
 				break;

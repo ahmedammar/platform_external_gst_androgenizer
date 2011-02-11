@@ -116,6 +116,17 @@ int emit_file(struct project *p)
 
 		printf("LOCAL_PRELINK_MODULE := false\n");
 
+		if (m->header_target) {
+			printf("LOCAL_COPY_HEADERS_TO := %s\n", m->header_target);
+		}
+
+		if (m->headers) {
+			printf("LOCAL_COPY_HEADERS := \\\n");
+			for (j = 0; j < m->headers - 1; j++)
+				printf("\t%s \\\n",  m->header[j].name);
+			printf("\t%s\n\n", m->header[j].name);
+		}
+
 		switch (p->module[i].mtype) {
 		case MODULE_SHARED_LIBRARY:
 			printf("include $(BUILD_SHARED_LIBRARY)\n");

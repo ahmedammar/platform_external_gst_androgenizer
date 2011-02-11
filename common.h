@@ -54,10 +54,16 @@ struct subdir {
 	char *name;
 };
 
+struct header {
+	char *name;
+};
+
 struct module {
 	char *name; //local_module;
 	enum module_type mtype;
-
+	char *header_target;
+	struct header *header;
+	int headers;
 	struct source *source;
 	int sources;
 	struct flag *cflag;
