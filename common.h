@@ -41,7 +41,7 @@ struct source {
 	struct generator *gen;
 };
 
-struct cflag {
+struct flag {
 	char *flag;
 };
 
@@ -60,8 +60,10 @@ struct module {
 
 	struct source *source;
 	int sources;
-	struct cflag *cflag;
+	struct flag *cflag;
 	int cflags;
+	struct flag *cppflag;
+	int cppflags;
 	char *ldflags;
 	struct library *library;
 	int libraries;

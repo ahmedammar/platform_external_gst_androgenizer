@@ -106,6 +106,13 @@ int emit_file(struct project *p)
 				printf("\t%s \\\n",  m->cflag[j].flag);
 			printf("\t%s\n\n", m->cflag[j].flag);
 		}
+
+		if (m->cppflags) {
+			printf("LOCAL_CPPFLAGS := \\\n");
+			for (j = 0; j < m->cppflags - 1; j++)
+				printf("\t%s \\\n",  m->cppflag[j].flag);
+			printf("\t%s\n\n", m->cppflag[j].flag);
+		}
 		switch (p->module[i].mtype) {
 		case MODULE_SHARED_LIBRARY:
 			printf("include $(BUILD_SHARED_LIBRARY)\n");

@@ -11,6 +11,7 @@ enum mode {
 	MODE_MODULE,
 	MODE_SOURCES,
 	MODE_CFLAGS,
+	MODE_CPPFLAGS,
 	MODE_LDFLAGS,
 	MODE_TAGS,
 	MODE_SUBDIR,
@@ -82,8 +83,17 @@ static void add_cflag(struct module *m, char *flag)
 	if (strcmp("-Werror", flag) == 0)
 		return;
 	m->cflags++;
-	m->cflag = realloc(m->cflag, m->cflags * sizeof(struct cflag));
+	m->cflag = realloc(m->cflag, m->cflags * sizeof(struct flag));
 	m->cflag[m->cflags - 1].flag = strdup(flag);
+}
+
+static void add_cppflag(struct module *m, char *flag)
+{
+	if (strcmp("-Werror", flag) == 0)
+		return;
+	m->cppflags++;
+	m->cppflag = realloc(m->cppflag, m->cppflags * sizeof(struct flag));
+	m->cppflag[m->cppflags - 1].flag = strdup(flag);
 }
 
 static void add_source(struct module *m, char *name, struct generator *g)
@@ -161,6 +171,9 @@ static enum mode get_mode(char *arg)
 	if (strcmp("-:CFLAGS", arg) == 0)
 		return MODE_CFLAGS;
 
+	if (strcmp("-:CPPFLAGS", arg) == 0)
+		return MODE_CPPFLAGS;
+
 	if (strcmp("-:LDFLAGS", arg) == 0)
 		return MODE_LDFLAGS;
 
@@ -235,6 +248,9 @@ struct project *options_parse(int argc, char **args)
 				break;
 			case MODE_CFLAGS:
 				add_cflag(m, arg);
+				break;
+			case MODE_CPPFLAGS:
+				add_cppflag(m, arg);
 				break;
 			case MODE_TAGS:
 				add_tag(m, arg);
