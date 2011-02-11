@@ -113,6 +113,9 @@ int emit_file(struct project *p)
 				printf("\t%s \\\n",  m->cppflag[j].flag);
 			printf("\t%s\n\n", m->cppflag[j].flag);
 		}
+
+		printf("LOCAL_PRELINK_MODULE := false\n");
+
 		switch (p->module[i].mtype) {
 		case MODULE_SHARED_LIBRARY:
 			printf("include $(BUILD_SHARED_LIBRARY)\n");

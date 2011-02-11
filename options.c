@@ -8,7 +8,9 @@
 enum mode {
 	MODE_UNDEFINED,
 	MODE_PROJECT,
-	MODE_MODULE,
+	MODE_MODULE_SHARED,
+	MODE_MODULE_STATIC,
+	MODE_MODULE_EXECUTABLE,
 	MODE_SOURCES,
 	MODE_CFLAGS,
 	MODE_CPPFLAGS,
@@ -162,8 +164,14 @@ static enum mode get_mode(char *arg)
 	if (strcmp("-:PROJECT", arg) == 0)
 		return MODE_PROJECT;
 
-	if (strcmp("-:MODULE", arg) == 0)
-		return MODE_MODULE;
+	if (strcmp("-:STATIC", arg) == 0)
+		return MODE_MODULE_STATIC;
+
+	if (strcmp("-:SHARED", arg) == 0)
+		return MODE_MODULE_SHARED;
+
+	if (strcmp("-:EXECUTABLE", arg) == 0)
+		return MODE_MODULE_EXECUTABLE;
 
 	if (strcmp("-:SOURCES", arg) == 0)
 		return MODE_SOURCES;
@@ -195,26 +203,13 @@ struct project *options_parse(int argc, char **args)
 	char *arg;
 	int i;
 	enum build_type bt;
+	enum module_type mt;
 	struct project *p = NULL;
 	struct module *m = NULL;
 
 	if (getenv("ANDROGENIZER_NDK"))
 		bt = BUILD_NDK;
 	else bt = BUILD_EXTERNAL;
-/*
-	p = new_project("pname", SCRIPT_TOP);
-	m = new_module("foo", MODULE_SHARED_LIBRARY);
-	add_tag(m, TAG_OPTIONAL);
-	add_source(m, "flah.c", NULL);
-	add_source(m, "foop.c", NULL);
-	add_source(m, "gnarg.c", NULL);
-	add_source(m, "plah.c", NULL);
-	add_source(m, "dung.c", NULL);
-	add_library(m, "dl", LIBRARY_NDK);
-	add_library(m, "media", LIBRARY_UNSUPPORTED);
-	add_library(m, "nice", LIBRARY_EXTERNAL);
-	add_module(p, m);
-*/
 
 	if (argc < 2) {
 //print help!
@@ -235,10 +230,18 @@ struct project *options_parse(int argc, char **args)
 			case MODE_SUBDIR:
 				add_subdir(p, arg);
 				break;
-			case MODE_MODULE:
+			case MODE_MODULE_SHARED:
+			case MODE_MODULE_STATIC:
+			case MODE_MODULE_EXECUTABLE:
 				if (m)
 					add_module(p, m);
-				m = new_module(arg, MODULE_SHARED_LIBRARY);
+				if (mode == MODE_MODULE_SHARED)
+					mt = MODULE_SHARED_LIBRARY;
+				if (mode == MODE_MODULE_STATIC)
+					mt = MODULE_STATIC_LIBRARY;
+				if (mode == MODE_MODULE_EXECUTABLE)
+					mt = MODULE_EXECUTABLE;
+				m = new_module(arg, mt);
 				break;
 			case MODE_SOURCES:
 				add_source(m, arg, NULL);
