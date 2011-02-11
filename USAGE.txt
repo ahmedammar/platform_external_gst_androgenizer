@@ -1,0 +1,33 @@
+-:PROJECT should be called first, and once.
+	
+Module instantiation:
+-:STATIC  creates a new module that will close with BUILD_STATIC_LIBRARY
+-:SHARED  creates a new module that will close with BUILD_SHARED_LIBRARY
+-:EXECUTABLE creates a new module that will close with BUILD_EXECUTABLE
+Multiple modules can be instantiated with a single command line
+
+Adding resources to modules (a module must be declared first!):
+-:SOURCES followed by any number of source files
+
+-:CFLAGS followed by any number of cflags
+-:CPPFLAGS followed by any number of cppflags
+	-Werror is silently removed!
+
+-:LDFLAGS followed by any number of linker directives to be processed...
+	-l<foo> will be added as lib<foo> to LOCAL_SHARED_LIBRARIES
+	-L will be silently removed
+	-pthread will be silently removed
+-:TAGS  must be followed by any number of: optional user eng tests
+
+-:SUBDIR adds an -include, expects <project>_TOP variable to be defined
+
+-:HEADERS followed by any number of headers for LOCAL_COPY_HEADERS
+
+-:HEADER_TARGET sets LOCAL_COPY_HEADERS_TO
+	may be followed by multiple strings, but only the last is kept
+
+-:PASSTHROUGH followed by any number of strings to be dumped directly into
+	the current module.  eg LOCAL_ARM_MODE:=arm
+
+-:END optional... might go away in the future, was probably a dumb idea.
+	ends the current module, but so does starting a new one...
