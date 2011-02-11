@@ -74,7 +74,6 @@ struct module {
 	int cflags;
 	struct flag *cppflag;
 	int cppflags;
-	char *ldflags;
 	struct library *library;
 	int libraries;
 	struct passthrough *passthrough;

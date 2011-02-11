@@ -81,12 +81,15 @@ void add_tag(struct module *m, char *name)
 		tag = TAG_OPTIONAL;
 
 	m->tags |= tag;
+	free(name);
 }
 
 static void add_cflag(struct module *m, char *flag)
 {
-	if (strcmp("-Werror", flag) == 0)
+	if (strcmp("-Werror", flag) == 0) {
+		free(flag);
 		return;
+	}
 	m->cflags++;
 	m->cflag = realloc(m->cflag, m->cflags * sizeof(struct flag));
 	m->cflag[m->cflags - 1].flag = flag;
@@ -94,8 +97,10 @@ static void add_cflag(struct module *m, char *flag)
 
 static void add_cppflag(struct module *m, char *flag)
 {
-	if (strcmp("-Werror", flag) == 0)
+	if (strcmp("-Werror", flag) == 0) {
+		free(flag);
 		return;
+	}
 	m->cppflags++;
 	m->cppflag = realloc(m->cppflag, m->cppflags * sizeof(struct flag));
 	m->cppflag[m->cppflags - 1].flag = flag;
@@ -136,22 +141,29 @@ static void add_ldflag(struct module *m, char *flag, enum build_type btype)
 	enum library_type ltype;
 	int len = strlen(flag);
 
-	if (len < 2)  //this is probably a WTF condition...
+	if (len < 2)  {//this is probably a WTF condition...
+		free(flag);
 		return;
+	}
 
 	if (flag[0] == '-') {
-		if (flag[1] == 'L') //we eat that for BREAKFAST
-			return;
-		if (flag[1] == 'l') {// actually figure out what libtype...
-			ltype = library_scope(flag + 2);
-			add_library(m, flag+2, ltype);
+		if (flag[1] == 'L') {//we eat that for BREAKFAST
+			free(flag);
 			return;
 		}
-		if (strcmp(flag, "-pthread") == 0) //yum
+		if (flag[1] == 'l') {// actually figure out what libtype...
+			ltype = library_scope(flag + 2);
+			add_library(m, strdup(flag+2), ltype);
+			free(flag);
 			return;
+		}
+		if (strcmp(flag, "-pthread") == 0) {//yum
+			free(flag);
+			return;
+		}
 		add_library(m, flag, LIBRARY_FLAG);
-	}
-	//else add an ldflag directly...
+	} else
+		free(flag);
 }
 
 static void add_module(struct project *p, struct module *m)
@@ -159,6 +171,7 @@ static void add_module(struct project *p, struct module *m)
 	p->modules++;
 	p->module = realloc(p->module, p->modules * sizeof(struct module));
 	p->module[p->modules - 1] = *m;
+	free(m);
 }
 
 static void add_subdir(struct project *p, char *name)
@@ -171,6 +184,7 @@ static void add_subdir(struct project *p, char *name)
 
 static enum mode get_mode(char *arg)
 {
+	int outval = MODE_UNDEFINED;
 	int len = strlen(arg);
 
 	if (len < 3)
@@ -179,48 +193,38 @@ static enum mode get_mode(char *arg)
 		return MODE_UNDEFINED;
 
 	if (strcmp("-:PROJECT", arg) == 0)
-		return MODE_PROJECT;
+		outval = MODE_PROJECT;
+	else if (strcmp("-:STATIC", arg) == 0)
+		outval = MODE_MODULE_STATIC;
+	else if (strcmp("-:SHARED", arg) == 0)
+		outval = MODE_MODULE_SHARED;
+	else if (strcmp("-:EXECUTABLE", arg) == 0)
+		outval = MODE_MODULE_EXECUTABLE;
+	else if (strcmp("-:SOURCES", arg) == 0)
+		outval = MODE_SOURCES;
+	else if (strcmp("-:CFLAGS", arg) == 0)
+		outval = MODE_CFLAGS;
+	else if (strcmp("-:CPPFLAGS", arg) == 0)
+		outval = MODE_CPPFLAGS;
+	else if (strcmp("-:LDFLAGS", arg) == 0)
+		outval = MODE_LDFLAGS;
+	else if (strcmp("-:TAGS", arg) == 0)
+		outval = MODE_TAGS;
+	else if (strcmp("-:SUBDIR", arg) == 0)
+		outval = MODE_SUBDIR;
+	else if (strcmp("-:HEADERS", arg) == 0)
+		outval = MODE_HEADERS;
+	else if (strcmp("-:HEADER_TARGET", arg) == 0)
+		outval = MODE_HEADER_TARGET;
+	else if (strcmp("-:PASSTHROUGH", arg) == 0)
+		outval = MODE_PASSTHROUGH;
+	else if (strcmp("-:END", arg) == 0)
+		outval = MODE_END;
 
-	if (strcmp("-:STATIC", arg) == 0)
-		return MODE_MODULE_STATIC;
+	if (outval != MODE_UNDEFINED)
+		free(arg);
 
-	if (strcmp("-:SHARED", arg) == 0)
-		return MODE_MODULE_SHARED;
-
-	if (strcmp("-:EXECUTABLE", arg) == 0)
-		return MODE_MODULE_EXECUTABLE;
-
-	if (strcmp("-:SOURCES", arg) == 0)
-		return MODE_SOURCES;
-
-	if (strcmp("-:CFLAGS", arg) == 0)
-		return MODE_CFLAGS;
-
-	if (strcmp("-:CPPFLAGS", arg) == 0)
-		return MODE_CPPFLAGS;
-
-	if (strcmp("-:LDFLAGS", arg) == 0)
-		return MODE_LDFLAGS;
-
-	if (strcmp("-:TAGS", arg) == 0)
-		return MODE_TAGS;
-
-	if (strcmp("-:SUBDIR", arg) == 0)
-		return MODE_SUBDIR;
-
-	if (strcmp("-:HEADERS", arg) == 0)
-		return MODE_HEADERS;
-
-	if (strcmp("-:HEADER_TARGET", arg) == 0)
-		return MODE_HEADER_TARGET;
-
-	if (strcmp("-:PASSTHROUGH", arg) == 0)
-		return MODE_PASSTHROUGH;
-
-	if (strcmp("-:END", arg) == 0)
-		return MODE_END;
-
-	return MODE_UNDEFINED;
+	return outval;
 }
 
 struct project *options_parse(int argc, char **args)
