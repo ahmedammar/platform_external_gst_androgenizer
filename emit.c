@@ -113,8 +113,9 @@ int emit_file(struct project *p)
 			printf("\t%s\n\n", m->cflag[j].flag);
 		}
 
+/* OOPS!  Android actually ignores LOCAL_CPPFLAGS */
 		if (m->cppflags) {
-			printf("LOCAL_CPPFLAGS := \\\n");
+			printf("LOCAL_CFLAGS += \\\n");
 			for (j = 0; j < m->cppflags - 1; j++)
 				printf("\t%s \\\n",  m->cppflag[j].flag);
 			printf("\t%s\n\n", m->cppflag[j].flag);
