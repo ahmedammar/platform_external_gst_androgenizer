@@ -213,6 +213,12 @@ static void add_ldflag(struct module *m, char *flag, enum build_type btype)
 		add_library(m, flag, LIBRARY_FLAG);
 	} else {
 		char *dot = rindex(flag, '.');
+
+		if (dot && (strcmp(dot, ".lo") == 0)) {
+			free(flag);
+			return;
+		}
+
 		if (dot && (strcmp(dot, ".la") == 0)) {
 			char *slash = rindex(flag, '/');
 			char *temp, *lname;
@@ -232,7 +238,8 @@ static void add_ldflag(struct module *m, char *flag, enum build_type btype)
 			free(flag);
 			return;
 		}
-		add_library(m, flag, LIBRARY_FLAG);
+		free(flag);
+//		add_library(m, flag, LIBRARY_FLAG);
 	}
 }
 
