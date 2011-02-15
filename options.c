@@ -5,23 +5,23 @@
 #include "common.h"
 #include "library.h"
 
+#define OPTION_ENTRY(x) MODE_##x,
 enum mode {
-	MODE_UNDEFINED,
-	MODE_PROJECT,
-	MODE_MODULE_SHARED,
-	MODE_MODULE_STATIC,
-	MODE_MODULE_EXECUTABLE,
-	MODE_SOURCES,
-	MODE_CFLAGS,
-	MODE_CPPFLAGS,
-	MODE_LDFLAGS,
-	MODE_TAGS,
-	MODE_SUBDIR,
-	MODE_HEADER_TARGET,
-	MODE_HEADERS,
-	MODE_PASSTHROUGH,
-	MODE_END
+#include "option_entries.h"
 };
+#undef OPTION_ENTRY
+
+struct opstrings {
+	char *str;
+	enum mode mode;
+};
+
+#define OPTION_ENTRY(x) {"-:"#x, MODE_##x},
+static struct opstrings opstrings[]={
+#include "option_entries.h"
+	{NULL, 0}
+};
+#undef OPTION_ENTRY
 
 static char *add_slashes(char *in)
 {
@@ -181,9 +181,9 @@ static void add_subdir(struct project *p, char *name)
 	p->subdir[p->subdirs - 1].name = name;
 }
 
-
 static enum mode get_mode(char *arg)
 {
+	int i;
 	int outval = MODE_UNDEFINED;
 	int len = strlen(arg);
 
@@ -192,34 +192,9 @@ static enum mode get_mode(char *arg)
 	if ((arg[0] != '-') || (arg[1] != ':'))
 		return MODE_UNDEFINED;
 
-	if (strcmp("-:PROJECT", arg) == 0)
-		outval = MODE_PROJECT;
-	else if (strcmp("-:STATIC", arg) == 0)
-		outval = MODE_MODULE_STATIC;
-	else if (strcmp("-:SHARED", arg) == 0)
-		outval = MODE_MODULE_SHARED;
-	else if (strcmp("-:EXECUTABLE", arg) == 0)
-		outval = MODE_MODULE_EXECUTABLE;
-	else if (strcmp("-:SOURCES", arg) == 0)
-		outval = MODE_SOURCES;
-	else if (strcmp("-:CFLAGS", arg) == 0)
-		outval = MODE_CFLAGS;
-	else if (strcmp("-:CPPFLAGS", arg) == 0)
-		outval = MODE_CPPFLAGS;
-	else if (strcmp("-:LDFLAGS", arg) == 0)
-		outval = MODE_LDFLAGS;
-	else if (strcmp("-:TAGS", arg) == 0)
-		outval = MODE_TAGS;
-	else if (strcmp("-:SUBDIR", arg) == 0)
-		outval = MODE_SUBDIR;
-	else if (strcmp("-:HEADERS", arg) == 0)
-		outval = MODE_HEADERS;
-	else if (strcmp("-:HEADER_TARGET", arg) == 0)
-		outval = MODE_HEADER_TARGET;
-	else if (strcmp("-:PASSTHROUGH", arg) == 0)
-		outval = MODE_PASSTHROUGH;
-	else if (strcmp("-:END", arg) == 0)
-		outval = MODE_END;
+	for  (i = 0; opstrings[i].str != NULL; i++)
+		if (strcmp(opstrings[i].str, arg) == 0)
+			outval = opstrings[i].mode;
 
 	if (outval != MODE_UNDEFINED)
 		free(arg);
