@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "common.h"
 #include "library.h"
@@ -98,23 +99,48 @@ void add_tag(struct module *m, char *name)
 	free(name);
 }
 
-static void add_cflag(struct module *m, char *flag)
+static char *path_subst(struct project *p, char *in)
+{
+	if (p->abs_top && p->rel_top &&
+	    (strlen(in) > 2) && (in[0] == '-') && (in[1] == 'I')) {
+		if (strncmp(in + 2, p->rel_top, strlen(p->rel_top)) == 0) {
+			int newlen = strlen(in) - strlen(p->rel_top)
+			           + strlen(p->abs_top) + 1;
+			char *newstr = malloc(newlen * sizeof(char));
+			newstr[0] = '-';
+			newstr[1] = 'I';
+			strcpy(newstr + 2, p->abs_top);
+			strcat(newstr, in + 2 + strlen(p->rel_top));
+			free(in);
+			return newstr;
+		}
+	}
+	return in;
+}
+
+static void add_cflag(struct project *p, struct module *m, char *flag)
 {
 	if (strcmp("-Werror", flag) == 0) {
 		free(flag);
 		return;
 	}
+
+	flag = path_subst(p, flag);
+
 	m->cflags++;
 	m->cflag = realloc(m->cflag, m->cflags * sizeof(struct flag));
 	m->cflag[m->cflags - 1].flag = flag;
 }
 
-static void add_cppflag(struct module *m, char *flag)
+static void add_cppflag(struct project *p, struct module *m, char *flag)
 {
 	if (strcmp("-Werror", flag) == 0) {
 		free(flag);
 		return;
 	}
+
+	flag = path_subst(p, flag);
+
 	m->cppflags++;
 	m->cppflag = realloc(m->cppflag, m->cppflags * sizeof(struct flag));
 	m->cppflag[m->cppflags - 1].flag = flag;
@@ -269,10 +295,10 @@ struct project *options_parse(int argc, char **args)
 				add_ldflag(m, arg, p->btype);
 				break;
 			case MODE_CFLAGS:
-				add_cflag(m, arg);
+				add_cflag(p, m, arg);
 				break;
 			case MODE_CPPFLAGS:
-				add_cppflag(m, arg);
+				add_cppflag(p, m, arg);
 				break;
 			case MODE_TAGS:
 				add_tag(m, arg);

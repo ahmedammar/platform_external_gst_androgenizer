@@ -2,6 +2,12 @@
 
 -:SUBDIR adds an -include, expects <project>_TOP variable to be defined
 
+Path substitution for -I statements
+-:ABS_TOP sets the absolute path to the source directory
+-:REL_TOP sets the relative path to the source directory
+Should probably always be used as such:
+	-:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir)
+
 Module instantiation:
 -:STATIC  creates a new module that will close with BUILD_STATIC_LIBRARY
 -:SHARED  creates a new module that will close with BUILD_SHARED_LIBRARY
