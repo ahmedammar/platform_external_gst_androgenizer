@@ -168,6 +168,14 @@ static void add_passthrough(struct module *m, char *name)
 	m->passthrough[m->passthroughs - 1].name = name;
 }
 
+static void add_libfilter(struct module *m, char *name, enum library_type ltype)
+{
+	m->libfilters++;
+	m->libfilter = realloc(m->libfilter, m->libfilters * sizeof(struct library));
+	m->libfilter[m->libfilters - 1].name = name;
+	m->libfilter[m->libfilters - 1].ltype = ltype;
+}
+
 static void add_library(struct module *m, char *name, enum library_type ltype)
 {
 	m->libraries++;
@@ -191,13 +199,14 @@ static void add_ldflag(struct module *m, char *flag, enum build_type btype)
 			free(flag);
 			return;
 		}
-		if (flag[1] == 'l') {// actually figure out what libtype...
-			ltype = library_scope(flag + 2);
-			add_library(m, strdup(flag+2), ltype);
+		if ((strcmp(flag, "-pthread") == 0) ||
+		    (strcmp(flag, "-lpthread") == 0)) {//yum
 			free(flag);
 			return;
 		}
-		if (strcmp(flag, "-pthread") == 0) {//yum
+		if (flag[1] == 'l') {// actually figure out what libtype...
+			ltype = library_scope(flag + 2);
+			add_library(m, strdup(flag+2), ltype);
 			free(flag);
 			return;
 		}
@@ -205,17 +214,25 @@ static void add_ldflag(struct module *m, char *flag, enum build_type btype)
 	} else {
 		char *dot = rindex(flag, '.');
 		if (dot && (strcmp(dot, ".la") == 0)) {
-			char *temp, *slash = rindex(flag, '/');
+			char *slash = rindex(flag, '/');
+			char *temp, *lname;
+
+			if (slash)
+				lname = strstr(slash, "lib");
+			else
+				lname = strstr(flag, "lib");
 			*dot = 0;
-			if (slash) {
+			if (lname) {
 				temp = flag;
-				flag = strdup(slash + 1);
+				flag = strdup(lname + 3);
 				free(temp);
+				add_library(m, flag, LIBRARY_EXTERNAL);
+				return;
 			}
-			add_library(m, flag, LIBRARY_STATIC);
+			free(flag);
 			return;
 		}
-		free(flag);
+		add_library(m, flag, LIBRARY_FLAG);
 	}
 }
 
@@ -332,6 +349,9 @@ struct project *options_parse(int argc, char **args)
 				break;
 			case MODE_ABS_TOP:
 				set_abs_top(p, arg);
+				break;
+			case MODE_LIBFILTER_STATIC:
+				add_libfilter(m, arg, LIBRARY_STATIC);
 				break;
 			case MODE_END:
 				break;

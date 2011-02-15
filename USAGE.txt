@@ -25,6 +25,10 @@ Adding resources to modules (a module must be declared first!):
 	-l<foo> will be added as lib<foo> to LOCAL_SHARED_LIBRARIES
 	-L will be silently removed
 	-pthread will be silently removed
+
+-:LIBFILTER_STATIC followed by a list of libs (no lib prefix, or extension)
+	to be interpreted as LOCAL_STATIC_LIBRARIES
+
 -:TAGS  must be followed by any number of: optional user eng tests
 
 -:HEADERS followed by any number of headers for LOCAL_COPY_HEADERS
@@ -37,3 +41,4 @@ Adding resources to modules (a module must be declared first!):
 
 -:END optional... might go away in the future, was probably a dumb idea.
 	ends the current module, but so does starting a new one...
+

@@ -77,6 +77,8 @@ struct module {
 	int cppflags;
 	struct library *library;
 	int libraries;
+	struct library *libfilter;
+	int libfilters;
 	struct passthrough *passthrough;
 	int passthroughs;
 	int tags;

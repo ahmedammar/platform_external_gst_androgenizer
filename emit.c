@@ -1,10 +1,20 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include "common.h"
 
-void emit_libraries(struct library *l, int count, enum build_type bt)
+void emit_libraries(struct library *l, int count, enum build_type bt,
+                    struct library *filt, int fcount)
 {
-	int i, first;
+	int i, j, first;
+/*libfilter pass.  this is the king of the kludges, but I haven't
+  thought of a reasonable solution... yet?
+*/
+
+	for (i = 0; i < count; i++)
+		for (j = 0; j < fcount; j++)
+			if (strcmp(l[i].name, filt[j].name) == 0)
+				l[i].ltype = filt[j].ltype;
 
 	if (bt == BUILD_NDK) {
 		first = 1;
@@ -47,13 +57,14 @@ void emit_libraries(struct library *l, int count, enum build_type bt)
 		if (!first)
 			printf("\n\n");
 
+		first = 1;
 		for (i = 0; i < count; i++) {
 			if ((l[i].ltype == LIBRARY_STATIC)) {
 				if (first) {
 					first = 0;
 					printf("LOCAL_STATIC_LIBRARIES:=\\\n");
 				} else printf(" \\\n");
-				printf("\t%s", l[i].name);
+				printf("\tlib%s", l[i].name);
 			}
 		}
 		if (!first)
@@ -117,7 +128,9 @@ int emit_file(struct project *p)
 
 		emit_libraries(m->library,
 		               m->libraries,
-		               p->btype);
+		               p->btype,
+		               m->libfilter,
+		               m->libfilters);
 
 		if (m->cflags) {
 			printf("LOCAL_CFLAGS := \\\n");
