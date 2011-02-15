@@ -202,8 +202,21 @@ static void add_ldflag(struct module *m, char *flag, enum build_type btype)
 			return;
 		}
 		add_library(m, flag, LIBRARY_FLAG);
-	} else
+	} else {
+		char *dot = rindex(flag, '.');
+		if (dot && (strcmp(dot, ".la") == 0)) {
+			char *temp, *slash = rindex(flag, '/');
+			*dot = 0;
+			if (slash) {
+				temp = flag;
+				flag = strdup(slash + 1);
+				free(temp);
+			}
+			add_library(m, flag, LIBRARY_STATIC);
+			return;
+		}
 		free(flag);
+	}
 }
 
 static void add_module(struct project *p, struct module *m)
