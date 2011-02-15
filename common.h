@@ -89,6 +89,8 @@ struct project {
 	int subdirs;
 	enum build_type btype;
 	enum script_type stype;
+	char *abs_top;
+	char *rel_top;
 };
 
 #endif /*__COMMON_H__*/

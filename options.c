@@ -47,6 +47,20 @@ static char *add_slashes(char *in)
 	return out;
 }
 
+static void set_abs_top(struct project *p, char *str)
+{
+	if (p->abs_top)
+		free(p->abs_top);
+	p->abs_top = str;
+}
+
+static void set_rel_top(struct project *p, char *str)
+{
+	if (p->rel_top)
+		free(p->rel_top);
+	p->rel_top = str;
+}
+
 static struct project *new_project(char *name, enum script_type stype, enum build_type btype)
 {
 	struct project *out = calloc(1, sizeof(struct project));
@@ -235,16 +249,16 @@ struct project *options_parse(int argc, char **args)
 			case MODE_SUBDIR:
 				add_subdir(p, arg);
 				break;
-			case MODE_MODULE_SHARED:
-			case MODE_MODULE_STATIC:
-			case MODE_MODULE_EXECUTABLE:
+			case MODE_SHARED:
+			case MODE_STATIC:
+			case MODE_EXECUTABLE:
 				if (m)
 					add_module(p, m);
-				if (mode == MODE_MODULE_SHARED)
+				if (mode == MODE_SHARED)
 					mt = MODULE_SHARED_LIBRARY;
-				if (mode == MODE_MODULE_STATIC)
+				if (mode == MODE_STATIC)
 					mt = MODULE_STATIC_LIBRARY;
-				if (mode == MODE_MODULE_EXECUTABLE)
+				if (mode == MODE_EXECUTABLE)
 					mt = MODULE_EXECUTABLE;
 				m = new_module(arg, mt);
 				break;
@@ -273,6 +287,12 @@ struct project *options_parse(int argc, char **args)
 				break;
 			case MODE_PASSTHROUGH:
 				add_passthrough(m, arg);
+				break;
+			case MODE_REL_TOP:
+				set_rel_top(p, arg);
+				break;
+			case MODE_ABS_TOP:
+				set_abs_top(p, arg);
 				break;
 			case MODE_END:
 				break;
