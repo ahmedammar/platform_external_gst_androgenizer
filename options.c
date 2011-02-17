@@ -125,6 +125,11 @@ static void add_cflag(struct project *p, struct module *m, char *flag)
 		return;
 	}
 
+	if (strcmp("-pthread", flag) == 0) {
+		free(flag);
+		return;
+	}
+
 	flag = path_subst(p, flag);
 
 	m->cflags++;
