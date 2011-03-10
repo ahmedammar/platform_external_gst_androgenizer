@@ -30,7 +30,8 @@ enum tags {
 	TAG_USER = 1,
 	TAG_ENG = 2,
 	TAG_TESTS = 4,
-	TAG_OPTIONAL = 8
+	TAG_OPTIONAL = 8,
+        TAG_DEBUG = 16
 };
 
 struct generator {

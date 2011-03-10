@@ -95,6 +95,9 @@ void add_tag(struct module *m, char *name)
 	if (strcmp("optional", name) == 0)
 		tag = TAG_OPTIONAL;
 
+        if (strcmp("debug", name) == 0)
+                tag = TAG_DEBUG;
+
 	m->tags |= tag;
 	free(name);
 }

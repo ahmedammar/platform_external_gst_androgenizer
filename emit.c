@@ -115,6 +115,8 @@ int emit_file(struct project *p)
 				printf("tests ");
 			if (m->tags & TAG_OPTIONAL)
 				printf("optional ");
+			if (m->tags & TAG_DEBUG)
+				printf("debug ");
 			printf("\n\n");
 		}
 
