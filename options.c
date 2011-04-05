@@ -24,6 +24,12 @@ static struct opstrings opstrings[]={
 };
 #undef OPTION_ENTRY
 
+void die(char *error)
+{
+	fprintf(stderr, "Error in command line: %s\n", error);
+	exit(1);
+}
+
 static char *add_slashes(char *in)
 {
 	int newlen = 0;
@@ -318,11 +324,15 @@ struct project *options_parse(int argc, char **args)
 				p = new_project(arg, SCRIPT_SUBDIRECTORY, bt);
 				break;
 			case MODE_SUBDIR:
+				if (!p)
+					die("-:PROJECT must come before -:SUBDIR");
 				add_subdir(p, arg);
 				break;
 			case MODE_SHARED:
 			case MODE_STATIC:
 			case MODE_EXECUTABLE:
+				if (!p)
+					die("-:PROJECT must come before a module type");
 				if (m)
 					add_module(p, m);
 				if (mode == MODE_SHARED)
@@ -334,38 +344,60 @@ struct project *options_parse(int argc, char **args)
 				m = new_module(arg, mt);
 				break;
 			case MODE_SOURCES:
+				if (!m)
+					die("a module type must be declared before adding -:SOURCES");
 				add_source(m, arg, NULL);
 				break;
 			case MODE_LDFLAGS:
+				if (!m)
+					die("a module type must be declared before adding -:LDFLAGS");
 				add_ldflag(m, arg, p->btype);
 				break;
 			case MODE_CFLAGS:
+				if (!p || !m)
+					die("a module type must be declared before adding -:CFLAGS");
 				add_cflag(p, m, arg);
 				break;
 			case MODE_CPPFLAGS:
+				if (!p || !m)
+					die("a module type must be declared before adding -:CPPFLAGS");
 				add_cppflag(p, m, arg);
 				break;
 			case MODE_TAGS:
+				if (!m)
+					die("a module type must be declared before setting -:TAGS");
 				add_tag(m, arg);
 				break;
 			case MODE_HEADER_TARGET:
+				if (!m)
+					die("a module type must be declared before setting a -:HEADER_TARGET");
 				if (m->header_target)
 					free(m->header_target);
 				m->header_target = arg;
 				break;
 			case MODE_HEADERS:
+				if (!m)
+					die("a module type must be declared before adding -:HEADERS");
 				add_header(m, arg);
 				break;
 			case MODE_PASSTHROUGH:
+				if (!m)
+					die("a module type must be declared before a -:PASSTHROUGH");
 				add_passthrough(m, arg);
 				break;
 			case MODE_REL_TOP:
+				if (!p)
+					die("a -:PROJECT must be declared before -:REL_TOP");
 				set_rel_top(p, arg);
 				break;
 			case MODE_ABS_TOP:
+				if (!p)
+					die("a -:PROJECT must be declared before -:ABS_TOP");
 				set_abs_top(p, arg);
 				break;
 			case MODE_LIBFILTER_STATIC:
+				if (!m)
+					die("a module type must be declared before adding libfilters");
 				add_libfilter(m, arg, LIBRARY_STATIC);
 				break;
 			case MODE_END:
