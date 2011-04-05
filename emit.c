@@ -42,6 +42,18 @@ void emit_libraries(struct library *l, int count, enum build_type bt,
 		}
 		if (!first)
 			printf("\n\n");
+		first = 1;
+		for (i = 0; i < count; i++) {
+			if (l[i].ltype == LIBRARY_STATIC) {
+				if (first) {
+					first = 0;
+					printf("LOCAL_STATIC_LIBRARIES:=\\\n");
+				} else printf(" \\\n");
+				printf("\tlib%s", l[i].name);
+			}
+		}
+		if (!first)
+			printf("\n\n");
 	} else { //bt == BUILD_EXTERNAL
 		first = 1;
 		for (i = 0; i < count; i++) {
