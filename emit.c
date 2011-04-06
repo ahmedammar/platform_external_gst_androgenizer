@@ -24,7 +24,7 @@ void emit_libraries(struct library *l, int count, enum build_type bt,
 				if (first) {
 					first = 0;
 					printf("LOCAL_LDLIBS:=\\\n");
-				} else printf("\n");
+				} else printf(" \\\n");
 				printf("\t-l%s", l[i].name);
 			}
 		}
